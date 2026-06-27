@@ -2,3 +2,11 @@
 *.env.local
 *.env.*.local
 node_modules/
+
+.vercel
+
+# local Claude Code settings (not secrets, but machine-specific)
+.claude/settings.local.json
+
+# nested git repo — has its own history, exclude to avoid submodule issues
+awesome-design-md/
