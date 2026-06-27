@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Cafe — لوحة الإدارة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* ── Espresso Palette ── */
+      --canvas:   #100b08;
+      --s1:       #181210;
+      --s2:       #211814;
+      --s3:       #2b1f18;
+      --s4:       #352620;
+      --s5:       #40302a;
+
+      --gold:     #c9a96e;
+      --gold-h:   #dfc087;
+      --gold-dim: rgba(201,169,110,0.14);
+      --gold-mid: rgba(201,169,110,0.24);
+      --gold-glow:rgba(201,169,110,0.08);
+
+      --cream:    #faf4ec;
+      --cream-m:  #d9ccba;
+      --cream-s:  #90806e;
+      --cream-t:  #5a4a3a;
+
+      --hair:     #2e2018;
+      --hair-s:   #3e2e22;
+
+      --ok:   #4caf6e;
+      --err:  #e05353;
+      --warn: #d4a028;
+
+      --r-xs: 3px; --r-sm: 6px; --r-md: 8px; --r-lg: 12px;
+      --r-xl: 16px; --r-2xl: 22px; --r-pill: 9999px;
+      --font: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25);
+      --shadow-btn:  0 2px 8px rgba(201,169,110,0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%; font-family: var(--font);
+      background: var(--canvas); color: var(--cream);
+      font-size: 15px; line-height: 1.65; overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app { display: flex; height: 100vh; }
+
+    /* ════════════════════════════════════════
+       SIDEBAR
+    ════════════════════════════════════════ */
+    .sidebar {
+      width: 236px; min-width: 236px;
+      background: var(--s1);
+      border-inline-start: 1px solid var(--hair);
+      display: flex; flex-direction: column;
+      height: 100%; overflow: hidden;
+      position: relative;
+    }
+
+    /* Subtle grain overlay */
+    .sidebar::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      background-size: 150px;
+      pointer-events: none; z-index: 0; opacity: 0.5;
+    }
+
+    .sidebar > * { position: relative; z-index: 1; }
+
+    /* Brand */
+    .brand {
+      padding: 18px 16px 16px;
+      border-bottom: 1px solid var(--hair);
+    }
+
+    .brand-mark {
+      display: flex; align-items: center; gap: 11px; margin-bottom: 12px;
+    }
+
+    .mark-icon {
+      width: 40px; height: 40px; border-radius: var(--r-lg);
+      background: linear-gradient(135deg, #c9a96e 0%, #8a5c30 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+      box-shadow: 0 2px 14px rgba(201,169,110,0.35);
+    }
+
+    .mark-text {}
+    .mark-name { font-size: 17px; font-weight: 700; color: var(--cream); letter-spacing: -0.3px; line-height: 1.15; }
+    .mark-en   { font-size: 9px; font-weight: 500; letter-spacing: 2px; color: var(--gold); opacity: 0.9; text-transform: uppercase; }
+
+    .brand-divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--hair-s) 0%, transparent 100%);
+      margin-bottom: 12px;
+    }
+
+    .branch-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--s2); border: 1px solid var(--hair-s);
+      border-radius: var(--r-pill); padding: 4px 10px;
+      font-size: 10px; color: var(--cream-s);
+    }
+    .branch-dot { width: 5px; height: 5px; border-radius: var(--r-pill); background: var(--ok); flex-shrink: 0; }
+
+    /* Nav */
+    .nav { padding: 10px 10px 0; flex: 1; overflow-y: auto; }
+
+    .nav-section-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.7px;
+      color: var(--cream-t); padding: 0 6px; margin: 8px 0 5px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 9px; border-radius: var(--r-lg);
+      cursor: pointer; margin-bottom: 1px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      position: relative; overflow: hidden;
+    }
+    .nav-item::before {
+      content: ''; position: absolute;
+      inset-inline-end: 0; top: 0; bottom: 0; width: 0;
+      background: var(--gold);
+      border-radius: var(--r-sm) 0 0 var(--r-sm);
+      transition: width 0.15s ease;
+    }
+    .nav-item:hover { background: var(--s2); }
+    .nav-item.active {
+      background: var(--gold-dim);
+      border-color: rgba(201,169,110,0.18);
+    }
+    .nav-item.active::before { width: 2px; }
+
+    .ni-icon {
+      width: 34px; height: 34px;
+      background: var(--s3); border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+      border: 1px solid var(--hair-s);
+      transition: all 0.15s;
+    }
+    .nav-item.active .ni-icon {
+      background: var(--gold-mid);
+      border-color: rgba(201,169,110,0.3);
+    }
+
+    .ni-body { flex: 1; min-width: 0; }
+    .ni-name { font-size: 12px; font-weight: 600; color: var(--cream-m); line-height: 1.25; }
+    .ni-desc { font-size: 10px; color: var(--cream-t); }
+    .nav-item.active .ni-name { color: var(--gold); }
+
+    .ni-badge {
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: var(--gold); color: var(--canvas);
+      font-size: 9px; font-weight: 800;
+      border-radius: var(--r-pill);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Sidebar footer */
+    .sidebar-foot {
+      padding: 12px 14px; border-top: 1px solid var(--hair);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .foot-ava {
+      width: 32px; height: 32px; border-radius: var(--r-pill);
+      background: linear-gradient(135deg, var(--gold), #8a5c30);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--canvas); flex-shrink: 0;
+    }
+    .foot-info .foot-name { font-size: 11px; font-weight: 600; color: var(--cream-m); }
+    .foot-info .foot-role { font-size: 10px; color: var(--cream-t); }
+    .foot-status {
+      margin-inline-start: auto;
+      display: flex; align-items: center; gap: 4px;
+      font-size: 9px; color: var(--ok); font-weight: 500;
+    }
+    .foot-status::before {
+      content: ''; width: 5px; height: 5px;
+      border-radius: var(--r-pill); background: var(--ok);
+    }
+
+    /* ════════════════════════════════════════
+       MAIN
+    ════════════════════════════════════════ */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      height: 52px; flex-shrink: 0;
+      background: var(--s1);
+      border-bottom: 1px solid var(--hair);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px;
+    }
+
+    .tb-right { display: flex; align-items: center; gap: 10px; }
+    .tb-left  { display: flex; align-items: center; gap: 8px; }
+
+    .tb-title  { font-size: 14px; font-weight: 700; color: var(--cream); letter-spacing: -0.2px; }
+    .tb-bread  { display: flex; align-items: center; gap: 6px; }
+    .tb-crumb  { font-size: 11px; color: var(--cream-t); }
+    .tb-sep    { font-size: 11px; color: var(--cream-t); }
+    .tb-active { font-size: 11px; color: var(--gold); font-weight: 500; }
+
+    .tb-btn {
+      height: 30px; padding: 0 13px;
+      background: transparent; border: 1px solid var(--hair-s);
+      border-radius: var(--r-md); color: var(--cream-s);
+      font-family: var(--font); font-size: 11px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: all 0.13s;
+    }
+    .tb-btn:hover { background: var(--s2); color: var(--cream-m); border-color: var(--s4); }
+
+    .tb-btn-gold {
+      background: linear-gradient(135deg, var(--gold) 0%, #a07840 100%);
+      border-color: transparent; color: var(--canvas);
+      font-weight: 700; box-shadow: var(--shadow-btn);
+    }
+    .tb-btn-gold:hover { background: linear-gradient(135deg, var(--gold-h) 0%, #b08848 100%); color: var(--canvas); }
+
+    /* ════════════════════════════════════════
+       CONTENT
+    ════════════════════════════════════════ */
+    .content { flex: 1; overflow: hidden; position: relative; }
+
+    .section { position: absolute; inset: 0; display: none; overflow-y: auto; }
+    .section.active { display: block; }
+
+    .section-iframe { background: var(--canvas); }
+    .section-iframe iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* ── MENU SECTION ── */
+    .sec-wrap { padding: 22px 24px 32px; }
+
+    /* Page header */
+    .page-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--cream); letter-spacing: -0.4px; margin-bottom: 3px; }
+    .page-sub   { font-size: 12px; color: var(--cream-s); }
+    .page-date  { font-size: 11px; color: var(--cream-t); text-align: start; }
+
+    /* Stats */
+    .stats-row { display: flex; gap: 13px; margin-bottom: 24px; }
+
+    .stat-card {
+      flex: 1;
+      background: var(--s1);
+      border: 1px solid var(--hair);
+      border-radius: var(--r-xl);
+      padding: 16px 18px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .stat-card:hover { border-color: var(--hair-s); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; inset-inline-end: 0;
+      width: 60px; height: 60px;
+      background: var(--gold-glow);
+      border-radius: 0 var(--r-xl) 0 60px;
+    }
+
+    .stat-icon { font-size: 18px; margin-bottom: 10px; display: block; }
+    .stat-val  { font-size: 26px; font-weight: 700; color: var(--cream); letter-spacing: -0.6px; line-height: 1; margin-bottom: 4px; }
+    .stat-lbl  { font-size: 11px; color: var(--cream-s); }
+    .stat-ch   { font-size: 10px; margin-top: 6px; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+    .stat-ch.up   { color: var(--ok); }
+    .stat-ch.flat { color: var(--cream-t); }
+
+    /* Category tabs */
+    .cat-strip { display: flex; gap: 7px; margin-bottom: 20px; flex-wrap: wrap; }
+
+    .cat-tab {
+      padding: 5px 14px;
+      background: var(--s1); border: 1px solid var(--hair);
+      border-radius: var(--r-pill);
+      font-family: var(--font); font-size: 11px; font-weight: 500;
+      color: var(--cream-s); cursor: pointer;
+      transition: all 0.13s;
+    }
+    .cat-tab:hover:not(.active) { background: var(--s2); color: var(--cream-m); }
+    .cat-tab.active {
+      background: var(--gold-dim); border-color: rgba(201,169,110,0.3);
+      color: var(--gold); font-weight: 600;
+    }
+
+    /* Menu grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 14px;
+    }
+
+    .menu-card {
+      background: var(--s1);
+      border: 1px solid var(--hair);
+      border-radius: var(--r-xl);
+      overflow: hidden; cursor: pointer;
+      transition: all 0.18s ease;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .menu-card:hover {
+      border-color: var(--hair-s);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .menu-img {
+      height: 96px;
+      background: linear-gradient(160deg, var(--s2) 0%, var(--s3) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px;
+      border-bottom: 1px solid var(--hair);
+      position: relative;
+    }
+
+    .best-badge {
+      position: absolute; top: 8px; inset-inline-end: 8px;
+      background: linear-gradient(135deg, var(--gold) 0%, #a07840 100%);
+      color: var(--canvas); font-size: 8px; font-weight: 800;
+      padding: 2px 7px; border-radius: var(--r-pill);
+      letter-spacing: 0.3px;
+    }
+
+    .unavail-overlay {
+      position: absolute; inset: 0;
+      background: rgba(10,7,5,0.6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--err);
+      letter-spacing: 0.5px;
+    }
+
+    .menu-body { padding: 12px 13px 13px; }
+    .menu-name { font-size: 13px; font-weight: 700; color: var(--cream); margin-bottom: 4px; line-height: 1.3; }
+    .menu-desc { font-size: 11px; color: var(--cream-s); line-height: 1.55; margin-bottom: 11px; }
+
+    .menu-foot { display: flex; align-items: center; justify-content: space-between; }
+
+    .menu-price {
+      display: flex; flex-direction: column;
+    }
+    .price-val  { font-size: 16px; font-weight: 700; color: var(--gold); letter-spacing: -0.3px; line-height: 1.1; }
+    .price-cur  { font-size: 9px; font-weight: 500; color: var(--cream-t); letter-spacing: 0.3px; }
+
+    .add-btn {
+      width: 30px; height: 30px; border-radius: var(--r-pill);
+      background: var(--gold-dim); border: 1px solid rgba(201,169,110,0.25);
+      color: var(--gold); font-size: 20px; font-weight: 300;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.13s; line-height: 1;
+    }
+    .add-btn:hover {
+      background: var(--gold); color: var(--canvas);
+      box-shadow: var(--shadow-btn);
+    }
+
+    /* ── CART TOAST ── */
+    .cart-toast {
+      position: fixed; bottom: 22px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--s3); border: 1px solid var(--hair-s);
+      border-radius: var(--r-xl); padding: 11px 18px 11px 22px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: var(--cream-m);
+      z-index: 300; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap;
+    }
+    .cart-toast.show { transform: translateX(-50%) translateY(0); }
+    .cart-toast-icon { font-size: 16px; }
+    .cart-count {
+      background: var(--gold); color: var(--canvas);
+      font-size: 10px; font-weight: 800; border-radius: var(--r-pill);
+      padding: 1px 8px; margin-inline-start: 2px;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--hair-s); border-radius: 99px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .sidebar { width: 60px; min-width: 60px; }
+      .brand-mark, .brand-divider, .branch-pill, .nav-section-label,
+      .ni-body, .sidebar-foot .foot-info, .foot-status { display: none; }
+      .mark-icon { margin: 0 auto; }
+      .brand { display: flex; justify-content: center; }
+      .nav-item { justify-content: center; padding: 10px 5px; }
+      .ni-badge { position: absolute; top: 4px; inset-inline-start: 4px; }
+      .sidebar-foot { justify-content: center; }
+      .stats-row { flex-direction: column; }
+    }
+    @media (max-width: 600px) {
+      .menu-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cart-toast" id="cartToast">
+  <span class="cart-toast-icon">🛒</span>
+  <span id="toastMsg">تمت الإضافة</span>
+  <span class="cart-count" id="cartCount">0</span>
+</div>
+
+<div class="app">
+
+  <!-- ══ الشريط الجانبي ══ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="mark-icon">☕</div>
+        <div class="mark-text">
+          <div class="mark-name">برو كافيه</div>
+          <div class="mark-en">Pro Cafe</div>
+        </div>
+      </div>
+      <div class="brand-divider"></div>
+      <div class="branch-pill">
+        <span class="branch-dot"></span>
+        الفرع الرئيسي · الكويت
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section-label">الأقسام الرئيسية</div>
+
+      <div class="nav-item active" data-section="support">
+        <div class="ni-icon">🎧</div>
+        <div class="ni-body">
+          <div class="ni-name">خدمة العملاء</div>
+          <div class="ni-desc">الدعم والمحادثات</div>
+        </div>
+      </div>
+
+      <div class="nav-item" data-section="coffee">
+        <div class="ni-icon">☕</div>
+        <div class="ni-body">
+          <div class="ni-name">قسم القهوة</div>
+          <div class="ni-desc">المشروبات والإسبريسو</div>
+        </div>
+      </div>
+
+      <div class="nav-item" data-section="sweets">
+        <div class="ni-icon">🍰</div>
+        <div class="ni-body">
+          <div class="ni-name">قسم السويت</div>
+          <div class="ni-desc">الحلويات والمخبوزات</div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="foot-ava">م</div>
+      <div class="foot-info">
+        <div class="foot-name">Pro Cafe</div>
+        <div class="foot-role">مدير النظام</div>
+      </div>
+      <div class="foot-status">نشط</div>
+    </div>
+  </aside>
+
+  <!-- ══ المحتوى ══ -->
+  <div class="main">
+
+    <div class="topbar">
+      <div class="tb-right">
+        <div class="tb-bread">
+          <span class="tb-crumb">Pro Cafe</span>
+          <span class="tb-sep">›</span>
+          <span class="tb-active" id="topActive">خدمة العملاء</span>
+        </div>
+      </div>
+      <div class="tb-left">
+        <button class="tb-btn" onclick="alert('قريباً')">📊 التقارير</button>
+        <button class="tb-btn tb-btn-gold" id="topAddBtn">+ إضافة جديد</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- خدمة العملاء -->
+      <div class="section section-iframe active" id="sec-support">
+        <iframe src="customer-support-v2.html" id="supportFrame"></iframe>
+      </div>
+
+      <!-- قسم القهوة -->
+      <div class="section" id="sec-coffee">
+        <div class="sec-wrap">
+          <div class="page-head">
+            <div>
+              <div class="page-title">قسم القهوة</div>
+              <div class="page-sub">إدارة قائمة المشروبات والأسعار</div>
+            </div>
+            <div class="page-date" id="dateLabel"></div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card">
+              <span class="stat-icon">☕</span>
+              <div class="stat-val">٢٤</div>
+              <div class="stat-lbl">إجمالي المنتجات</div>
+              <div class="stat-ch up">↑ ٣ منتجات جديدة هذا الشهر</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">🧾</span>
+              <div class="stat-val">١٨٧</div>
+              <div class="stat-lbl">طلبات اليوم</div>
+              <div class="stat-ch up">↑ ١٢٪ مقارنة بالأمس</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">💰</span>
+              <div class="stat-val">١.٤٥٠</div>
+              <div class="stat-lbl">متوسط قيمة الطلب (د.ك)</div>
+              <div class="stat-ch up">↑ ٥٪ هذا الأسبوع</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">⭐</span>
+              <div class="stat-val">٤.٨</div>
+              <div class="stat-lbl">تقييم العملاء</div>
+              <div class="stat-ch flat">→ مستقر</div>
+            </div>
+          </div>
+
+          <div class="cat-strip" id="coffeeCats">
+            <button class="cat-tab active" data-cat="الكل">الكل</button>
+            <button class="cat-tab" data-cat="إسبريسو">إسبريسو</button>
+            <button class="cat-tab" data-cat="لاتيه">لاتيه</button>
+            <button class="cat-tab" data-cat="مثلج">مثلج</button>
+            <button class="cat-tab" data-cat="بدون كافيين">بدون كافيين</button>
+          </div>
+
+          <div class="menu-grid" id="coffeeGrid"></div>
+        </div>
+      </div>
+
+      <!-- قسم السويت -->
+      <div class="section" id="sec-sweets">
+        <div class="sec-wrap">
+          <div class="page-head">
+            <div>
+              <div class="page-title">قسم السويت</div>
+              <div class="page-sub">إدارة الحلويات والمخبوزات</div>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card">
+              <span class="stat-icon">🍰</span>
+              <div class="stat-val">١٨</div>
+              <div class="stat-lbl">إجمالي المنتجات</div>
+              <div class="stat-ch up">↑ ٢ منتجات جديدة</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">🧾</span>
+              <div class="stat-val">٩٣</div>
+              <div class="stat-lbl">طلبات اليوم</div>
+              <div class="stat-ch up">↑ ٨٪ مقارنة بالأمس</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">💰</span>
+              <div class="stat-val">٢.١٠٠</div>
+              <div class="stat-lbl">متوسط قيمة الطلب (د.ك)</div>
+              <div class="stat-ch flat">→ مستقر</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">⭐</span>
+              <div class="stat-val">٤.٧</div>
+              <div class="stat-lbl">تقييم العملاء</div>
+              <div class="stat-ch up">↑ تحسّن هذا الشهر</div>
+            </div>
+          </div>
+
+          <div class="cat-strip" id="sweetsCats">
+            <button class="cat-tab active" data-cat="الكل">الكل</button>
+            <button class="cat-tab" data-cat="كيك">كيك</button>
+            <button class="cat-tab" data-cat="كوكيز">كوكيز</button>
+            <button class="cat-tab" data-cat="حلويات شرقية">حلويات شرقية</button>
+            <button class="cat-tab" data-cat="موسمي">موسمي</button>
+          </div>
+
+          <div class="menu-grid" id="sweetsGrid"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const COFFEE = [
+  { name:'إسبريسو',          emoji:'☕', desc:'شوت إسبريسو مركّز أحادي أو مضاعف',                   price:'0.750', avail:true,  cat:'إسبريسو',      best:false },
+  { name:'كابتشينو',         emoji:'🫧', desc:'إسبريسو مع حليب مبخر وزبد ناعم كثيف',                price:'1.250', avail:true,  cat:'إسبريسو',      best:true  },
+  { name:'لاتيه',            emoji:'🥛', desc:'إسبريسو ناعم مع حليب مبخر ورغوة خفيفة',              price:'1.350', avail:true,  cat:'لاتيه',        best:true  },
+  { name:'أمريكانو',         emoji:'🫖', desc:'إسبريسو مخفف بالماء الساخن بنكهة سلسة',              price:'1.000', avail:true,  cat:'إسبريسو',      best:false },
+  { name:'فلات وايت',        emoji:'☕', desc:'إسبريسو مضاعف مع حليب ناعم ورغوة رقيقة',             price:'1.500', avail:true,  cat:'لاتيه',        best:false },
+  { name:'موكا',             emoji:'🍫', desc:'إسبريسو مع شوكولاتة وحليب مبخر وكريمة طازجة',        price:'1.750', avail:true,  cat:'لاتيه',        best:true  },
+  { name:'لاتيه مثلج',       emoji:'🧊', desc:'إسبريسو بارد مع حليب وثلج متجدد',                   price:'1.500', avail:true,  cat:'مثلج',         best:false },
+  { name:'فرابيه قهوة',      emoji:'🥤', desc:'مزيج ثلجي بالقهوة والحليب والكريمة المخفوقة',        price:'1.850', avail:true,  cat:'مثلج',         best:true  },
+  { name:'قهوة شعير',        emoji:'🌾', desc:'مشروب دافئ بدون كافيين بنكهة القهوة الغنية',          price:'1.000', avail:false, cat:'بدون كافيين',  best:false },
+  { name:'ماتشا لاتيه',      emoji:'🍵', desc:'مسحوق الماتشا الياباني الأصيل مع حليب مبخر',         price:'1.750', avail:true,  cat:'بدون كافيين',  best:false },
+  { name:'كراميل ماكياتو',   emoji:'🍮', desc:'فانيليا وحليب وإسبريسو مع صوص الكراميل الذهبي',      price:'2.000', avail:true,  cat:'لاتيه',        best:true  },
+  { name:'تيرميسو لاتيه',    emoji:'🧁', desc:'نكهة التيرميسو الكلاسيكية الإيطالية في كوب قهوة',     price:'2.250', avail:true,  cat:'لاتيه',        best:false },
+];
+
+const SWEETS = [
+  { name:'تشيز كيك',          emoji:'🍰', desc:'تشيز كيك كريمي بقاعدة بسكويت مقرمشة وفراولة',       price:'2.250', avail:true,  cat:'كيك',             best:true  },
+  { name:'براونيز شوكولاتة',  emoji:'🍫', desc:'براونيز غنية بالشوكولاتة الداكنة والجوز المحمص',     price:'1.500', avail:true,  cat:'كوكيز',           best:false },
+  { name:'كرواسون زبدة',      emoji:'🥐', desc:'كرواسون فرنسي بالزبدة الأصلية طازج من الفرن',         price:'1.000', avail:true,  cat:'كيك',             best:true  },
+  { name:'كوكيز شوكولاتة',    emoji:'🍪', desc:'كوكيز طرية بحبات الشوكولاتة ونكهة الفانيليا',         price:'0.850', avail:true,  cat:'كوكيز',           best:false },
+  { name:'تارت فراولة',       emoji:'🍓', desc:'تارت بالكاسترد والفراولة الطازجة على عجينة مقرمشة',   price:'2.000', avail:true,  cat:'كيك',             best:false },
+  { name:'مافن توت',          emoji:'🫐', desc:'مافن طازج بحبات التوت الأزرق ورائحة الفانيليا',        price:'1.250', avail:true,  cat:'كيك',             best:false },
+  { name:'كنافة',             emoji:'🍮', desc:'كنافة عربية أصيلة بالجبن وشيرة القطر العطرة',          price:'1.750', avail:true,  cat:'حلويات شرقية',   best:true  },
+  { name:'بقلاوة مشكلة',      emoji:'🍬', desc:'تشكيلة بقلاوة بالفستق والكاجو والعسل الطبيعي',         price:'2.500', avail:true,  cat:'حلويات شرقية',   best:false },
+  { name:'لاڤا كيك',         emoji:'🎂', desc:'كيك شوكولاتة دافئ بقلب سائل يذوب في الفم',              price:'2.250', avail:false, cat:'كيك',             best:false },
+  { name:'تيرميسو',           emoji:'🍰', desc:'طبقات البسكويت والماسكاربوني ومسحوق الكاكاو الفاخر',   price:'2.500', avail:true,  cat:'كيك',             best:true  },
+  { name:'موس باشن فروت',     emoji:'🍑', desc:'موس خفيف بعصير الباشن فروت الاستوائي المنعش',           price:'2.000', avail:true,  cat:'موسمي',           best:false },
+  { name:'كيك التمر',         emoji:'🫘', desc:'كيك محشو بالتمر والهيل والزعفران السعودي الأصيل',        price:'1.750', avail:true,  cat:'موسمي',           best:true  },
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderGrid(items, id) {
+  document.getElementById(id).innerHTML = items.map(item => `
+    <div class="menu-card">
+      <div class="menu-img">
+        ${item.emoji}
+        ${item.best ? '<span class="best-badge">الأكثر طلباً</span>' : ''}
+        ${!item.avail ? '<div class="unavail-overlay">نفد المخزون</div>' : ''}
+      </div>
+      <div class="menu-body">
+        <div class="menu-name">${item.name}</div>
+        <div class="menu-desc">${item.desc}</div>
+        <div class="menu-foot">
+          <div class="menu-price">
+            <span class="price-val">${item.price}</span>
+            <span class="price-cur">دينار كويتي</span>
+          </div>
+          ${item.avail ? `<button class="add-btn" onclick="addCart('${item.name}')">+</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderGrid(COFFEE, 'coffeeGrid');
+renderGrid(SWEETS, 'sweetsGrid');
+
+// Set date
+const now = new Date();
+document.getElementById('dateLabel').textContent =
+  now.toLocaleDateString('ar-KW', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+// ── CART TOAST ────────────────────────────────────────────────────────────────
+let cartN = 0, toastTimer;
+
+function addCart(name) {
+  cartN++;
+  const toast = document.getElementById('cartToast');
+  document.getElementById('toastMsg').textContent = `تمت إضافة "${name}"`;
+  document.getElementById('cartCount').textContent = cartN;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+// ── CATEGORY TABS ─────────────────────────────────────────────────────────────
+function bindCats(stripId, data, gridId) {
+  document.getElementById(stripId).addEventListener('click', e => {
+    const tab = e.target.closest('.cat-tab');
+    if (!tab) return;
+    document.querySelectorAll(`#${stripId} .cat-tab`).forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const cat = tab.dataset.cat;
+    renderGrid(cat === 'الكل' ? data : data.filter(i => i.cat === cat), gridId);
+  });
+}
+bindCats('coffeeCats', COFFEE, 'coffeeGrid');
+bindCats('sweetsCats', SWEETS, 'sweetsGrid');
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const NAV_META = {
+  support: { label: 'خدمة العملاء', btn: '+ محادثة جديدة' },
+  coffee:  { label: 'قسم القهوة',   btn: '+ منتج جديد'    },
+  sweets:  { label: 'قسم السويت',   btn: '+ منتج جديد'    },
+};
+
+let activeSection = 'support';
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const key = item.dataset.section;
+    if (key === activeSection) return;
+    activeSection = key;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === key));
+    document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === `sec-${key}`));
+    document.getElementById('topActive').textContent = NAV_META[key].label;
+    document.getElementById('topAddBtn').textContent = NAV_META[key].btn;
+  });
+});
+
+document.getElementById('topAddBtn').addEventListener('click', () => {
+  if (activeSection === 'support') {
+    try { document.getElementById('supportFrame').contentWindow.showNewConvModal(); } catch(e) {}
+  } else {
+    alert('سيتم إضافة نموذج المنتج قريباً');
+  }
+});
+</script>
+</body>
+</html>
